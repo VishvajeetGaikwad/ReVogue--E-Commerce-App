@@ -1,0 +1,11 @@
+const paypal = require("paypal-rest-sdk");
+const dotenv = require("dotenv");
+dotenv.config();
+
+paypal.configure({
+  mode: process.env.PAYPAL_MODE || "sandbox", // fallback to sandbox
+  client_id: process.env.PAYPAL_CLIENT_ID,
+  client_secret: process.env.PAYPAL_CLIENT_SECRET,
+});
+
+module.exports = paypal;
