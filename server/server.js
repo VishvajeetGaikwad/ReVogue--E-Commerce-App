@@ -1,36 +1,38 @@
 const express = require("express");
-const mongoose = require("mongoose");
-const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const authRouter = require("./routes/auth/auth-routes");
-const adminProductsRouter = require("./routes/admin/products-routes");
-const adminOrderRouter = require("./routes/admin/order-routes");
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+const cookieParser = require("cookie-parser");
 
-const shopProductsRouter = require("./routes/shop/products-routes");
-const shopCartRouter = require("./routes/shop/cart-routes");
-const shopAddressRouter = require("./routes/shop/address-routes");
-const shopOrderRouter = require("./routes/shop/order-routes");
-const shopSearchRouter = require("./routes/shop/search-routes");
+// Routes
+const authRoute = require("./routes/auth");
+const userRoute = require("./routes/user");
+const productRoute = require("./routes/product");
+const cartRoute = require("./routes/cart");
+const orderRoute = require("./routes/order");
+const stripeRoute = require("./routes/stripe");
 
-const shopReviewRouter = require("./routes/shop/review-routes");
+dotenv.config();
 
-const commonFeatureRouter = require("./routes/common/feature-routes");
-
-//create a database connection -> u can also
-//create a separate file for this and then import/use that file here
-require("dotenv").config();
-
-mongoose
-  .connect(process.env.MONGODB_URL)
-  .then(() => console.log("MongoDB connected"))
-  .catch((error) => console.log(error));
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// ✅ Allow both local and deployed frontend origins
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://revogue-e-commerce-app-1.onrender.com",
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "DELETE", "PUT"],
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: [
       "Content-Type",
       "Authorization",
@@ -42,19 +44,27 @@ app.use(
   })
 );
 
-app.use(cookieParser());
+// ✅ Middleware
 app.use(express.json());
-app.use("/api/auth", authRouter);
-app.use("/api/admin/products", adminProductsRouter);
-app.use("/api/admin/orders", adminOrderRouter);
+app.use(cookieParser());
 
-app.use("/api/shop/products", shopProductsRouter);
-app.use("/api/shop/cart", shopCartRouter);
-app.use("/api/shop/address", shopAddressRouter);
-app.use("/api/shop/order", shopOrderRouter);
-app.use("/api/shop/search", shopSearchRouter);
-app.use("/api/shop/review", shopReviewRouter);
+// ✅ Routes
+app.use("/api/auth", authRoute);
+app.use("/api/users", userRoute);
+app.use("/api/products", productRoute);
+app.use("/api/carts", cartRoute);
+app.use("/api/orders", orderRoute);
+app.use("/api/checkout", stripeRoute);
 
-app.use("/api/common/feature", commonFeatureRouter);
-
-app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
+// ✅ DB Connection and Server Start
+mongoose
+  .connect(process.env.MONGO_URL)
+  .then(() => {
+    console.log("✅ MongoDB Connected");
+    app.listen(PORT, () => {
+      console.log(`🚀 Backend server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err);
+  });
