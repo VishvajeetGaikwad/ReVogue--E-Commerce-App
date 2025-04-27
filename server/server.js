@@ -1,23 +1,25 @@
 const express = require("express");
-const cors = require("cors");
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
+const authRouter = require("./routes/auth/auth-routes");
+const adminProductsRouter = require("./routes/admin/products-routes");
+const adminOrderRouter = require("./routes/admin/order-routes");
 
-// Routes
-const authRoute = require("./routes/auth");
-const userRoute = require("./routes/user");
-const productRoute = require("./routes/product");
-const cartRoute = require("./routes/cart");
-const orderRoute = require("./routes/order");
-const stripeRoute = require("./routes/stripe");
+const shopProductsRouter = require("./routes/shop/products-routes");
+const shopCartRouter = require("./routes/shop/cart-routes");
+const shopAddressRouter = require("./routes/shop/address-routes");
+const shopOrderRouter = require("./routes/shop/order-routes");
+const shopSearchRouter = require("./routes/shop/search-routes");
 
-dotenv.config();
+const shopReviewRouter = require("./routes/shop/review-routes");
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+const commonFeatureRouter = require("./routes/common/feature-routes");
 
-// ✅ Allow both local and deployed frontend origins
+//create a database connection -> u can also
+//create a separate file for this and then import/use that file here
+require("dotenv").config();
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://revogue-e-commerce-app-1.onrender.com",
@@ -44,27 +46,19 @@ app.use(
   })
 );
 
-// ✅ Middleware
-app.use(express.json());
 app.use(cookieParser());
+app.use(express.json());
+app.use("/api/auth", authRouter);
+app.use("/api/admin/products", adminProductsRouter);
+app.use("/api/admin/orders", adminOrderRouter);
 
-// ✅ Routes
-app.use("/api/auth", authRoute);
-app.use("/api/users", userRoute);
-app.use("/api/products", productRoute);
-app.use("/api/carts", cartRoute);
-app.use("/api/orders", orderRoute);
-app.use("/api/checkout", stripeRoute);
+app.use("/api/shop/products", shopProductsRouter);
+app.use("/api/shop/cart", shopCartRouter);
+app.use("/api/shop/address", shopAddressRouter);
+app.use("/api/shop/order", shopOrderRouter);
+app.use("/api/shop/search", shopSearchRouter);
+app.use("/api/shop/review", shopReviewRouter);
 
-// ✅ DB Connection and Server Start
-mongoose
-  .connect(process.env.MONGO_URL)
-  .then(() => {
-    console.log("✅ MongoDB Connected");
-    app.listen(PORT, () => {
-      console.log(`🚀 Backend server running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("❌ MongoDB connection error:", err);
-  });
+app.use("/api/common/feature", commonFeatureRouter);
+
+app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
