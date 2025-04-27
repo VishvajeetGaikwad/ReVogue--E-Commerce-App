@@ -19,12 +19,13 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.shopCart);
-  const { reviews = [] } = useSelector((state) => state.shopReview); // Default to an empty array
+  const { reviews } = useSelector((state) => state.shopReview);
 
   const { toast } = useToast();
 
   function handleRatingChange(getRating) {
     console.log(getRating, "getRating");
+
     setRating(getRating);
   }
 
@@ -92,13 +93,13 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
   }
 
   useEffect(() => {
-    if (productDetails?.id) {
-      dispatch(getReviews(productDetails._id));
-    }
-  }, [productDetails, dispatch]);
+    if (productDetails !== null) dispatch(getReviews(productDetails?._id));
+  }, [productDetails]);
+
+  console.log(reviews, "reviews");
 
   const averageReview =
-    reviews.length > 0
+    reviews && reviews.length > 0
       ? reviews.reduce((sum, reviewItem) => sum + reviewItem.reviewValue, 0) /
         reviews.length
       : 0;
@@ -106,7 +107,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="grid grid-cols-2 gap-8 sm:p-12 max-w-[90vw] sm:max-w-[80vw] lg:max-w-[70vw]">
-        <div className="relative overflow-hidden rounded-lg">
+        <div className="relative overflow-hidden rounded-lg ">
           <img
             src={productDetails?.image}
             alt={productDetails?.title}
@@ -118,7 +119,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
         <div className="">
           <div>
             <h1 className="text-3xl font-extrabold">{productDetails?.title}</h1>
-            <p className="text-muted-foreground text-2xl mb-5 mt-4">
+            <p className="text-muted-foreground text-ellipsis mb-5 mt-4">
               {productDetails?.description}
             </p>
           </div>
@@ -167,14 +168,12 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
           <div className="max-h-[300px] overflow-auto">
             <h2 className="text-xl font-bold mb-4">Reviews</h2>
             <div className="grid gap-6">
-              {reviews.length > 0 ? (
+              {reviews && reviews.length > 0 ? (
                 reviews.map((reviewItem) => (
-                  <div key={reviewItem._id} className="flex gap-4">
+                  <div className="flex gap-4">
                     <Avatar className="w-10 h-10 border">
                       <AvatarFallback>
-                        {reviewItem?.userName
-                          ? reviewItem?.userName[0].toUpperCase()
-                          : "U"}
+                        {reviewItem?.userName[0].toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="grid gap-1">
