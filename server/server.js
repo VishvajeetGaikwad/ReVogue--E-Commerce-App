@@ -23,6 +23,7 @@ const PORT = process.env.PORT || 5000;
 
 const allowedOrigins = [
   "http://localhost:5173",
+  "https://revogue-e-commerce-app.onrender.com",
   "https://revogue-e-commerce-app-1.onrender.com",
 ];
 
@@ -63,6 +64,4 @@ app.use("/api/shop/review", shopReviewRouter);
 
 app.use("/api/common/feature", commonFeatureRouter);
 
-app.listen(PORT, () =>
-  console.log(`Server is now running on port ${PORT}`)
-);
+app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
