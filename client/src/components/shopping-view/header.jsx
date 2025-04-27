@@ -76,10 +76,17 @@ function HeaderRightContent() {
   }
 
   useEffect(() => {
-    dispatch(fetchCartItems(user?.id));
-  }, [dispatch]);
+    if (user?.id) {
+      dispatch(fetchCartItems(user.id));
+    }
+  }, [dispatch, user?.id]);
 
-  console.log(cartItems, "sangam");
+  console.log(cartItems, "cartItems");
+
+  // Default values in case user is not available
+  const cartItemCount = cartItems?.items?.length || 0;
+  const userName = user?.userName || "Guest"; // Default if userName is not available
+  const avatarInitial = user?.userName ? user?.userName[0]?.toUpperCase() : "U"; // Default to 'U' if userName is missing
 
   return (
     <div className="flex lg:items-center lg:flex-row flex-col gap-4">
@@ -92,17 +99,13 @@ function HeaderRightContent() {
         >
           <ShoppingCart className="w-6 h-6" />
           <span className="absolute top-[-5px] right-[2px] font-bold text-sm">
-            {cartItems?.items?.length || 0}
+            {cartItemCount}
           </span>
           <span className="sr-only">User cart</span>
         </Button>
         <UserCartWrapper
           setOpenCartSheet={setOpenCartSheet}
-          cartItems={
-            cartItems && cartItems.items && cartItems.items.length > 0
-              ? cartItems.items
-              : []
-          }
+          cartItems={cartItems?.items || []} // Fallback to empty array if no items
         />
       </Sheet>
 
@@ -110,12 +113,12 @@ function HeaderRightContent() {
         <DropdownMenuTrigger asChild>
           <Avatar className="bg-black">
             <AvatarFallback className="bg-black text-white font-extrabold">
-              {user?.userName[0].toUpperCase()}
+              {avatarInitial}
             </AvatarFallback>
           </Avatar>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="right" className="w-56">
-          <DropdownMenuLabel>Logged in as {user?.userName}</DropdownMenuLabel>
+          <DropdownMenuLabel>Logged in as {userName}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => navigate("/shop/account")}>
             <UserCog className="mr-2 h-4 w-4" />
