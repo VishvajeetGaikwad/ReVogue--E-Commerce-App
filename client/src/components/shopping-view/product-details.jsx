@@ -19,13 +19,12 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.shopCart);
-  const { reviews } = useSelector((state) => state.shopReview);
+  const { reviews = [] } = useSelector((state) => state.shopReview); // Default to an empty array
 
   const { toast } = useToast();
 
   function handleRatingChange(getRating) {
     console.log(getRating, "getRating");
-
     setRating(getRating);
   }
 
@@ -93,13 +92,13 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
   }
 
   useEffect(() => {
-    if (productDetails !== null) dispatch(getReviews(productDetails?._id));
-  }, [productDetails]);
-
-  console.log(reviews, "reviews");
+    if (productDetails?.id) {
+      dispatch(getReviews(productDetails._id));
+    }
+  }, [productDetails, dispatch]);
 
   const averageReview =
-    reviews && reviews.length > 0
+    reviews.length > 0
       ? reviews.reduce((sum, reviewItem) => sum + reviewItem.reviewValue, 0) /
         reviews.length
       : 0;
@@ -168,12 +167,14 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
           <div className="max-h-[300px] overflow-auto">
             <h2 className="text-xl font-bold mb-4">Reviews</h2>
             <div className="grid gap-6">
-              {reviews && reviews.length > 0 ? (
+              {reviews.length > 0 ? (
                 reviews.map((reviewItem) => (
-                  <div className="flex gap-4">
+                  <div key={reviewItem._id} className="flex gap-4">
                     <Avatar className="w-10 h-10 border">
                       <AvatarFallback>
-                        {reviewItem?.userName[0].toUpperCase()}
+                        {reviewItem?.userName
+                          ? reviewItem?.userName[0].toUpperCase()
+                          : "U"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="grid gap-1">
