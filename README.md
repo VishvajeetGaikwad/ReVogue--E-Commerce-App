@@ -32,5 +32,4 @@
 - dotenv for environment configs
 - Multer for file uploads
 
-## 📂 Folder Structure
 
